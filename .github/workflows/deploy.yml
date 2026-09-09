@@ -26,19 +26,12 @@ jobs:
           NITRO_PRESET: node-server
         run: bun run build
 
-      - name: Setup SSH
+      - name: Deploy application
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
-
-      - name: Deploy to Ubuntu
-        run: |
-          ssh "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
-            "cd ~/git-actions && git pull origin main && bun install --frozen-lockfile && NITRO_PRESET=node-server bun run build"
-
-      - name: Restart application
-        run: |
-          ssh "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
-            "pkill -f '.output/server/index.mjs' || true; nohup bun run start > ~/git-actions/app.log 2>&1 &"
+          rm -rf ~/nodewatch
+          mkdir -p ~/nodewatch
+          cp -r .output ~/nodewatch/
+          cp package.json ~/nodewatch/
+          cd ~/nodewatch
+          pkill -f ".output/server/index.mjs" || true
+          nohup bun run start > app.log 2>&1 &
