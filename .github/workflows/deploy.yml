@@ -1,3 +1,4 @@
+```yaml
 name: Deploy Frontend to Ubuntu
 
 on:
@@ -19,19 +20,40 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: |
+          set -e
+          bun install --frozen-lockfile
 
       - name: Build application
         env:
           NITRO_PRESET: node-server
-        run: bun run build
+        run: |
+          set -e
+          bun run build
 
       - name: Deploy application
         run: |
+          set -e
+
           rm -rf ~/nodewatch
           mkdir -p ~/nodewatch
+
           cp -r .output ~/nodewatch/
           cp package.json ~/nodewatch/
+
           cd ~/nodewatch
+
           pkill -f ".output/server/index.mjs" || true
-          nohup bun run start > app.log 2>&1 &
+
+          nohup env PORT=6000 bun run start > app.log 2>&1 &
+
+          sleep 5
+
+          if ss -tulpn | grep -q ":6000"; then
+            echo "SUCCESS: Application is running on port 6000"
+          else
+            echo "FAILED: Application is not running on port 6000"
+            cat app.log
+            exit 1
+          fi
+```
