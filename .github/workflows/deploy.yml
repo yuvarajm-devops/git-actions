@@ -30,6 +30,7 @@ jobs:
         run: |
           rm -rf ~/nodewatch
           mkdir -p ~/nodewatch
+
           cp -r .output ~/nodewatch/
           cp package.json ~/nodewatch/
 
@@ -37,4 +38,4 @@ jobs:
 
           pkill -f ".output/server/index.mjs" || true
 
-          PORT=6000 nohup bun run start > app.log 2>&1 &
+          PORT=8080 nohup bun run start > app.log 2>&1 &
