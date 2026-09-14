@@ -28,6 +28,8 @@ jobs:
 
       - name: Deploy application
         run: |
+          set -e
+
           rm -rf ~/nodewatch
           mkdir -p ~/nodewatch
 
@@ -38,4 +40,8 @@ jobs:
 
           pkill -f ".output/server/index.mjs" || true
 
-          PORT=8080 nohup bun run start > app.log 2>&1 &
+          nohup env PORT=8080 HOST=0.0.0.0 bun .output/server/index.mjs > app.log 2>&1 &
+
+          sleep 5
+
+          ss -tulnp | grep 8080
